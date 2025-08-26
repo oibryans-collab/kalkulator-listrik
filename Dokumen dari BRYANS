@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kalkulator Listrik – Febrian P2TL</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+    h1 { text-align: center; }
+    .card { background: #fff; padding: 20px; border-radius: 12px; max-width: 500px; margin: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    label { display: block; margin-top: 10px; }
+    select, input { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; border-radius: 6px; }
+    button { margin-top: 16px; width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    #hasil { margin-top: 20px; padding: 15px; background: #eef; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Kalkulator Listrik – Febrian P2TL</h1>
+  <div class="card">
+    <label>Jenis Input:</label>
+    <select id="jenisInput">
+      <option value="watt">Watt</option>
+      <option value="ampere">Ampere</option>
+    </select>
+
+    <div id="inputWatt">
+      <label>Daya (Watt)</label>
+      <input type="number" id="dayaWatt" placeholder="contoh: 500">
+    </div>
+
+    <div id="inputAmpere" style="display:none">
+      <label>Arus (Ampere)</label>
+      <input type="number" id="dayaAmpere" placeholder="contoh: 2">
+      <label>Tegangan (Volt)</label>
+      <input type="number" id="voltase" placeholder="contoh: 220" value="220">
+    </div>
+
+    <label>Lama Pemakaian per Hari (jam)</label>
+    <input type="number" id="jam" placeholder="contoh: 8">
+
+    <label>Jumlah Unit</label>
+    <input type="number" id="unit" value="1">
+
+    <label>Tarif Listrik (Rp/kWh)</label>
+    <input type="number" id="tarif" placeholder="contoh: 1444.7" value="1444.7">
+
+    <button onclick="hitung()">Hitung</button>
+    <div id="hasil"></div>
+  </div>
+
+  <script>
+    const jenisInput = document.getElementById("jenisInput");
+    const inputWatt = document.getElementById("inputWatt");
+    const inputAmpere = document.getElementById("inputAmpere");
+
+    // Load saved preferences
+    window.onload = () => {
+      const savedJenis = localStorage.getItem("jenisInput");
+      if(savedJenis){
+        jenisInput.value = savedJenis;
+        toggleInput();
+      }
+      const savedVolt = localStorage.getItem("voltase");
+      if(savedVolt){
+        document.getElementById("voltase").value = savedVolt;
+      }
+    }
+
+    jenisInput.addEventListener("change", () => {
+      localStorage.setItem("jenisInput", jenisInput.value);
+      toggleInput();
+    });
+
+    document.getElementById("voltase").addEventListener("input", (e)=>{
+      localStorage.setItem("voltase", e.target.value);
+    });
+
+    function toggleInput(){
+      if(jenisInput.value === "watt"){
+        inputWatt.style.display = "block";
+        inputAmpere.style.display = "none";
+      } else {
+        inputWatt.style.display = "none";
+        inputAmpere.style.display = "block";
+      }
+    }
+
+    function hitung(){
+      let dayaWatt;
+      if(jenisInput.value === "watt"){
+        dayaWatt = parseFloat(document.getElementById("dayaWatt").value) || 0;
+      } else {
+        const ampere = parseFloat(document.getElementById("dayaAmpere").value) || 0;
+        const volt = parseFloat(document.getElementById("voltase").value) || 220;
+        dayaWatt = ampere * volt;
+      }
+
+      const jam = parseFloat(document.getElementById("jam").value) || 0;
+      const unit = parseFloat(document.getElementById("unit").value) || 1;
+      const tarif = parseFloat(document.getElementById("tarif").value) || 0;
+
+      const energiHarian = (dayaWatt * jam * unit) / 1000;
+      const energiBulanan = energiHarian * 30;
+      const biayaHarian = energiHarian * tarif;
+      const biayaBulanan = energiBulanan * tarif;
+
+      document.getElementById("hasil").innerHTML = `
+        Energi per Hari: <b>${energiHarian.toFixed(2)} kWh</b><br>
+        Energi per Bulan: <b>${energiBulanan.toFixed(2)} kWh</b><br>
+        Biaya per Hari: <b>Rp ${biayaHarian.toLocaleString()}</b><br>
+        Biaya per Bulan: <b>Rp ${biayaBulanan.toLocaleString()}</b>
+      `;
+    }
+  </script>
+</body>
+</html>
